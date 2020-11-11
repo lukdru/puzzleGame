@@ -1,16 +1,6 @@
 <div class="gameField">
     <fieldset>
         <legend>Let's Play!</legend>
-        <div class="grid">
-            <button class="tile tile--1" style="--area:A"></button>
-            <button class="tile tile--2" style="--area:B"></button>
-            <button class="tile tile--3" style="--area:C"></button>
-            <button class="tile tile--4" style="--area:D"></button>
-            <button class="tile tile--5" style="--area:E"></button>
-            <button class="tile tile--6" style="--area:F"></button>
-            <button class="tile tile--7" style="--area:G"></button>
-            <button class="tile tile--8" style="--area:H"></button>
-            <button class="tile tile--empty" style="--area:I"></button>
-        </div>
+            <canvas id="puzzleCanvas" (click)="tileClicked($event)" [height]="imageSize.height" [width]="imageSize.width"></canvas>
     </fieldset>
 </div>
