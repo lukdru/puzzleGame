@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Coordinates } from '../../interfaces/Coordinates';
 import { ImageSize } from '../../interfaces/ImageSize';
@@ -9,52 +9,54 @@ import { ImageSize } from '../../interfaces/ImageSize';
   styleUrls: ['./puzzle-game.component.less']
 })
 
-export class PuzzleGameComponent implements OnInit {
-  @ViewChild('puzzleCanvas', {static: true}) canvasRef: ElementRef;
-  public context: CanvasRenderingContext2D;
+export class PuzzleGameComponent implements OnInit, AfterViewInit {
+  @ViewChild('puzzleCanvas', {static: false}) canvasRef: ElementRef;
+
+  // Canvas 2d context
+  private context: CanvasRenderingContext2D;
 
   public boardParts: any;
   public boardSize: number = 0;
-  public tileCount: number = 0;
+  public tileCount: number = 3;
   public tileSize: number = 0;
 
   public imageSize: ImageSize = {height: 480, width: 480};
-  //public image: ImageData;
 
   public clickLoc : Coordinates = {x: 0, y: 0};
   public emptyLoc : Coordinates = {x: 0, y: 0};
 
   public isSolved : boolean = false;
 
+  public img = new Image();
+  public imgSrc = './assets/lithuania.jpg';
+
   constructor(private router: Router) {
   }
 
   ngOnInit(): void {
+    this.img = new Image();
+    this.img.src = this.imgSrc;
+  }
 
-    //this.context = (<HTMLCanvasElement>this.canvasRef.nativeElement).getContext('2d');
+  ngAfterViewInit(){
+    this.context = (this.canvasRef.nativeElement as HTMLCanvasElement).getContext('2d');
 
     this.boardSize = this.imageSize.width;
-
-    this.tileCount = 3;
-
     this.tileSize = this.boardSize / this.tileCount;
 
-    //this.context = this.canvasRef.nativeElement.getContext('2d');
-    let img = new Image();
-    img.src = 'assets/images/lithuania.jpg';
-
-    this.setBoard();
-    this.drawTiles();
-
-    console.log('INITIATED')
+    this.img.onload = () =>{
+      this.setBoard();
+      this.drawTiles();
+    }
   }
 
   /**
    * Clicking on a tile
   */
   public tileClicked(event: MouseEvent){
-    //this.clickLoc.x = Math.floor((event.pageX - this.offsetLeft) / this.tileSize);
-    //this.clickLoc.y = Math.floor((event.pageY - this.offsetTop) / this.tileSize);
+
+    this.clickLoc.x = Math.floor((event.pageX - this.canvasRef.nativeElement.offsetLeft) / this.tileSize);
+    this.clickLoc.y = Math.floor((event.pageY - this.canvasRef.nativeElement.offsetTop) / this.tileSize);
     if (this.checkDistance(this.clickLoc.x, this.clickLoc.y, this.emptyLoc.x, this.emptyLoc.y) == 1) {
       this.slideTile(this.emptyLoc, this.clickLoc);
       this.drawTiles();
@@ -64,6 +66,9 @@ export class PuzzleGameComponent implements OnInit {
     }
   }
 
+  /**
+   *  Navigate to winner page
+  */
   public win(){
     this.router.navigate(['winner']);
   }
@@ -93,16 +98,18 @@ export class PuzzleGameComponent implements OnInit {
    * Drawing tiles
   */
   public drawTiles() {
+
     this.context.clearRect ( 0 , 0 , this.boardSize , this.boardSize );
+
     for (var i = 0; i < this.tileCount; ++i) {
       for (var j = 0; j < this.tileCount; ++j) {
         var x = this.boardParts[i][j].x;
         var y = this.boardParts[i][j].y;
         if(i != this.emptyLoc.x || j != this.emptyLoc.y || this.isSolved == true) {
-          let img = new Image();
-          img.src = 'assets/images/lithuania.jpg';
-          this.context.drawImage(img, x * this.tileSize, y * this.tileSize, this.tileSize, this.tileSize,
+
+            this.context.drawImage(this.img, x * this.tileSize, y * this.tileSize, this.tileSize, this.tileSize,
               i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
+
         }
       }
     }
